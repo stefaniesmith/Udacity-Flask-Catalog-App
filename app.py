@@ -280,7 +280,7 @@ def delete_book(book_id):
     return redirect(url_for('show_all_categories_and_books'))
 
 
-@app.route('/categories/JSON')
+@app.route('/categories/json')
 def get_categories_json():
     """
     Endpoint for retrieving the category names and IDs in json format.
@@ -291,7 +291,7 @@ def get_categories_json():
     return jsonify(Categories=[c.serialize for c in categories])
 
 
-@app.route('/category/<int:category_id>/JSON')
+@app.route('/category/<int:category_id>/json')
 def get_books_by_category_json(category_id):
     """
     Endpoint for retrieving information on books
@@ -306,7 +306,7 @@ def get_books_by_category_json(category_id):
     return jsonify(Books=[b.serialize for b in books])
 
 
-@app.route('/book/<int:book_id>/JSON')
+@app.route('/book/<int:book_id>/json')
 def get_book_json(book_id):
     """
     Endpoint for retrieving information on a book in json format.
