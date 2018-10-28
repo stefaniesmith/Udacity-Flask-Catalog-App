@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/lux/bootstrap.min.css">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body class="shift-down">
+    <nav class="navbar navbar-dark bg-primary fixed-top">
+      <div class="container">
+        <h1 class="mb-0 text-white">Book Catalog</h1>
+        {% if logged_in == false %}
+          <form action="{{ url_for('show_login') }}" method = "get">
+            <button class="btn btn-secondary btn-sm" type="submit">Login</button>
+          </form>
+        {% else %}
+          <form action="{{ url_for('gdisconnect') }}" method = "get">
+            <button class="btn btn-secondary btn-sm" type="submit">Logout</button>
+          </form>
+        {% endif %}
+      </div>
+    </nav>
+    <main role="main" class="container">
+      <div class="row">
+        <div class="flash col-12">
+		  {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-dismissible alert-{{category}}">
+                  <button type="button" class="close" data-dismiss="alert">&times;</button>
+                  {{message}}
+                </div>
+              {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+      </div>
+      <div class="row mb-4">
+      <div class="col-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="list-group list-group-flush">
+              <h4 class="list-group-item">Categories</h4>
+              <a href="{{url_for('show_all_categories_and_books')}}" 
+                 class="list-group-item {{'active' if not selected_category }}">All</a>
+              {% for category in categories %}
+                <a href="{{url_for('show_books_by_category', category_id = category.id)}}" 
+                   class="list-group-item {{'active' if category.name == selected_category.name }}">
+                {{category.name}}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-8">
+        <div class="card">
+          <div class="card-body">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+               	  <h4 class="text-primary">{{ selected_category.name if selected_category else 'All' }} Books</h4>
+               	  {% if logged_in == true %}
+                    <button type="button" 
+                            class="btn btn-primary reduced-padding"
+                            data-toggle="modal" 
+                            data-target="#add-modal"
+                            data-category="{{selected_category.id}}">ADD BOOK</button>
+                   {% endif %}
+                </div>
+              </div>
+              {% if books|length == 0 %}
+              <div class="list-group-item">
+              	{% if selected_category %}
+                  <h6 class="mt-3">There are no books in this category</h4>
+                {% else %}
+                  <h6 class="mt-3">There are no books in the catalog</h4>
+                {% endif %}                 
+              </div>              
+              {% endif %}
+              {% for book in books %}
+                <div class="list-group-item flex-column align-items-start">
+                  <div class="d-flex w-100 justify-content-between">
+                    <b class="mb-1 text-primary"><strong>{{book.Book.title}}</strong></b>
+                    <small class="text-primary">Owner: {{book.User.name}}</small>
+                  </div>
+                  <p class="mb-1">{{book.Book.author}}</p>
+                  <p class="mb-2 text-primary" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  	<small>{{book.Book.description}}</small>
+                  </p>
+                  <div class="d-flex w-100 justify-content-between">
+                    <p class="mb-0"><small>{{book.Category.name}}</small></p>
+                    <div>
+                      <button type="button" 
+                              class="btn btn-outline-info btn-sm reduced-padding"
+                              data-toggle="modal" 
+                              data-target="#info-modal"
+                              data-title="{{book.Book.title}}" 
+                              data-author="{{book.Book.author}}"
+                              data-category="{{book.Category.name}}"
+                              data-description="{{book.Book.description}}">INFO</button>
+                      {% if current_user_id == book.Book.user_id %}
+                        <button type="button" 
+                                class="btn btn-outline-primary btn-sm reduced-padding"
+                                data-toggle="modal" 
+                                data-target="#edit-modal"
+                                data-id="{{book.Book.id}}" 
+                                data-title="{{book.Book.title}}" 
+                                data-author="{{book.Book.author}}"
+                                data-category="{{book.Book.category_id}}"
+                                data-description="{{book.Book.description}}">EDIT</button>
+                        <button type="button" 
+                                class="btn btn-outline-danger btn-sm reduced-padding"
+                                data-toggle="modal" 
+                                data-target="#delete-modal"
+                                data-id="{{book.Book.id}}" 
+                                data-title="{{book.Book.title}}">DELETE</button>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <!-- Info Modal -->
+      <div class="modal fade" tabindex="-1" role="dialog" id="info-modal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Book Details</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <dl>
+                <dt>Title</dt>
+                <dd id="book-title" class="text-primary"></dd>
+                <dt>Author</dt>
+                <dd id="book-author" class="text-primary"></dd>
+                <dt>Category</dt>
+                <dd id="book-category" class="text-primary"></dd>
+                <dt>Description</dt>
+                <dd id="book-description" class="text-primary"></dd>
+              </dl>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Edit Modal -->
+      <div class="modal fade" tabindex="-1" role="dialog" id="edit-modal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Book</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form action="" method="post">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="book-title" class="col-form-label">Title</label>
+                  <input type="text" class="form-control" id="book-title" name="title" maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label for="book-author" class="col-form-label">Author</label>
+                  <input type="text" class="form-control" id="book-author" name="author" maxlength="50">
+                </div>
+                <div class="form-group">
+                  <label for="book-category" class="col-form-label">Category</label>
+                  <select class="form-control" id="book-category" style="height: 46px;" name="category">
+                    {% for category in categories %}
+                      <option value="{{category.id}}">{{category.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="book-description" class="col-form-label">Description</label>
+                  <textarea class="form-control" rows="5" id="book-description" name="description" maxlength="1000"></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-info btn-sm">Save</button>
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Add Modal -->
+      <div class="modal fade" tabindex="-1" role="dialog" id="add-modal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Book</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form action="{{ url_for('add_book') }}" method="post">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="book-title" class="col-form-label">Title</label>
+                  <input type="text" class="form-control" id="book-title" name="title"  maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label for="book-author" class="col-form-label">Author</label>
+                  <input type="text" class="form-control" id="book-author" name="author" maxlength="50">
+                </div>
+                <div class="form-group">
+                  <label for="book-category" class="col-form-label">Category</label>
+                  <select class="form-control" id="book-category" style="height: 46px;" name="category">
+                    {% for category in categories %}
+                      <option value="{{category.id}}">{{category.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="book-description" class="col-form-label">Description</label>
+                  <textarea class="form-control" 
+                            rows="5" 
+                            id="book-description" 
+                            name="description" 
+                            maxlength="1000"></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-info btn-sm">Save</button>
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Delete Modal -->
+      <div class="modal fade" tabindex="-1" role="dialog" id="delete-modal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete Book</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form action="" method="post">
+              <div class="modal-body">
+              	<p class="lead">
+              		Are you sure you want to delete<br>
+              		<i id="book-title"></i>
+              		?
+              	</p>
+              </div>
+              <div class="modal-footer">
+                <form action="" method = "post">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Cancel</button>
+                </form>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      $('#info-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget)
+        var bookTitle = button.data('title')
+        var bookAuthor = button.data('author')
+        var bookCategory = button.data('category')
+        var bookDescription = button.data('description')        
+        var modal = $(this)
+        modal.find('#book-title').text(bookTitle)
+        modal.find('#book-author').text(bookAuthor)
+        modal.find('#book-category').text(bookCategory)
+        modal.find('#book-description').text(bookDescription)
+      })
+      $('#edit-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget)
+        var bookID = button.data('id')
+        var bookTitle = button.data('title')
+        var bookAuthor = button.data('author')
+        var bookCategory = button.data('category')
+        var bookDescription = button.data('description')   
+        var action = "{{ url_for('edit_book', book_id='999') }}".replace('999', bookID)
+        var modal = $(this)
+        modal.find('form').attr('action', action);
+        modal.find('#book-title').val(bookTitle)
+        modal.find('#book-author').val(bookAuthor)
+        modal.find('#book-category').val(bookCategory)
+        modal.find('#book-description').val(bookDescription)
+      })
+      $('#add-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget)
+        var bookCategory = button.data('category')
+        var modal = $(this)
+        modal.find('#book-category').val(bookCategory)
+      })
+      $('#delete-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget)
+        var bookID = button.data('id')
+        var bookTitle = button.data('title')
+        var action = "{{ url_for('delete_book', book_id='999') }}".replace('999', bookID)
+        var modal = $(this)
+        modal.find('form').attr('action', action);
+        modal.find('#book-title').text(bookTitle)
+      })
+    </script>
+  </body>
+</html>
