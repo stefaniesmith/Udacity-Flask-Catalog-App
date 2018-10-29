@@ -1,9 +1,10 @@
-# Python Flask Catalog Application
+# Book Catalog Application
 
+This web application was developed using the Python Flask framework, and uses Google's authentication services for sign-in. It can be used to track information on books, including title, author, description and category.
 
 ## Setup and Configuration
 
-To run the catalog application, it is recommended that you first set up the Ubuntu virtual machine (VM) that comes preloaded with Python, the PostgreSQL database and other supporting software. The following sections provide information on VM setup, adding items to the catalog database and launching the application.
+To run the catalog application, it is recommended that you first set up the Ubuntu virtual machine (VM) that comes preloaded with Python, the PostgreSQL database and other supporting software. The following sections provide information on setting up the VM, adding items to the catalog database and launching the application.
 
 #### Prerequisites
 
@@ -12,7 +13,7 @@ To set up the VM, you will need both Vagrant and VirtualBox. If you do not have 
 - [the vagrantup.com download page](https://www.vagrantup.com/downloads.html)
 - [the virtualbox.org download page](https://www.virtualbox.org/wiki/Downloads) 
 
-#### Set up the virtual machine
+#### Setting up the virtual machine
 
 Fork and clone the following Github repository:
 
@@ -29,12 +30,12 @@ Next, establish an SSH session with the VM:
 $ vagrant ssh
 ```
 
-#### Add the catalog application to the virtual machine
+#### Adding the catalog application to the virtual machine
 
 Download or clone this repository, and add the contents to the `vagrant` directory which is shared with the VM.
 
 
-#### Add categories and books to the database
+#### Adding categories and books to the database
 
 The `add_books.py` script should be run before launching the catalog application. This script will add a series of categories to the database (including Action/Adventure, Mystery and Science Fiction). It will also create some sample users and books. If you would like to create any additional categories, this can be done by modifying the python script.  
 
@@ -47,7 +48,7 @@ $ python add_books.py
 
 After running the script, you should see a `catalog.db` file in the `/vagrant` directory.
 
-#### Launch and access the application
+#### Launching and accessing the application
 
 The catalog application can be launched by running the `app.py` script:
 
