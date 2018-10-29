@@ -2,6 +2,23 @@
 
 This web application was developed using the Python Flask framework, and uses Google's authentication services for sign-in. It can be used to track information on books, including title, author, description and category.
 
+## Screenshots
+
+Before logging in, users can see all books in the catalog, filter by category and view book details.
+
+![Book catalog screenshot](static/all_books.png)
+
+![Book details screenshot](static/book_details.png)
+
+After logging in, users can add new books to the catalog, and can edit & delete books that they own (but cannot change books with other owners). 
+
+![Add book screenshot](static/add_book.png)
+
+![Edit book screenshot](static/edit_book.png)
+
+![Delete book screenshot](static/delete_book.png)
+
+
 ## Setup and Configuration
 
 To run the catalog application, it is recommended that you first set up the Ubuntu virtual machine (VM) that comes preloaded with Python, the PostgreSQL database and other supporting software. The following sections provide information on setting up the VM, adding items to the catalog database and launching the application.
