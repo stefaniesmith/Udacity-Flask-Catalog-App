@@ -1,4 +1,4 @@
-# Book Catalog Application
+# Book Catalog Web App
 
 This web application was developed using the Python Flask framework, and uses Google's authentication services for sign-in. It can be used to track information on books, including title, author, description and category.
 
@@ -33,6 +33,24 @@ $ vagrant ssh
 #### Adding the catalog application to the virtual machine
 
 Download or clone this repository, and add the contents to the `vagrant` directory which is shared with the VM.
+
+
+#### Obtaining OAuth credentials from Google
+
+The web application requires a file `client_secrets.json` with a client ID and secret from Google. This can be obtained using the following steps:
+1. Navigate to: https://console.developers.google.com/projectselector/apis/credentials
+2. Select the option to Create a project
+3. Set the Project name to Book Catalog and click Create
+4. From the navigation menu, select APIs and Services -> Credentials
+5. Select the option to Create credentials -> OAuth client ID
+6. Click "Configure consent screen"
+7. Set the Application name to Book Catalog and click Save
+8. Set the Application type to Web application and click Create
+9. Specify the Authorized JavaScript origins as: http://localhost:5000
+10. Specify two Authorized redirect URIs: http://localhost:5000/login http://localhost:5000/gconnect
+11. Click Create
+12. Once the OAuth client ID has been created, select the option to download it as a JSON file
+13. Rename the file to `client_secrets.json` and add it to the `vagrant` folder that is shared with the VM
 
 
 #### Adding categories and books to the database
